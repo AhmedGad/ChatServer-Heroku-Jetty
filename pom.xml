@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.example</groupId>
     <version>1.0-SNAPSHOT</version>
-    <artifactId>tcp_server</artifactId>
+    <artifactId>tcpserver</artifactId>
     <dependencies>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
