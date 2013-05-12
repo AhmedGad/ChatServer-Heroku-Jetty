@@ -24,8 +24,8 @@ class TCPServer extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		super.doPost(req, resp);
+		PrintWriter out = resp.getWriter();
+		out.println("F U 2abrahim-with post");
 	}
 
 	public static void main(String[] args) throws Exception {
