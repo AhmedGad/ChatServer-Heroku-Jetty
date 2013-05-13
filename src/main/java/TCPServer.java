@@ -18,17 +18,22 @@ class TCPServer extends HttpServlet {
 	private static final long serialVersionUID = -7823703173356571077L;
 	int global = 0;
 
+	void message(HttpServletResponse resp) {
+
+	}
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+
 		global++;
 		try {
 			int cnt = 0;
 			while (cnt < 10) {
 				PrintWriter out = resp.getWriter();
 				out.println("response : " + cnt++ + "request nu: " + global);
-				Thread.sleep(1000);
 			}
+			Thread.sleep(1000);
 			// String tempstr = req.getParameter("req");
 			// PrintWriter out = resp.getWriter();
 			// out.println("request: " + tempstr);
