@@ -34,7 +34,7 @@ class TCPServer extends HttpServlet {
 			while (true) {
 				if (write == cur) {
 					PrintWriter out = resp.getWriter();
-					out.println("response : " + cnt++ + "request nu: " + global);
+					out.println("response : " + cnt++ + "request nu: " + cur);
 					out.flush();
 					write = 0;
 				}
