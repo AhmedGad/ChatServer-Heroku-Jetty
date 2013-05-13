@@ -19,9 +19,23 @@ class TCPServer extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		PrintWriter out = resp.getWriter();
-		for (int i = 0; i < lst.size(); i++)
-			out.println("message nu: " + (i + 1) + " : " + lst.get(i));
+		InputStream in = req.getInputStream();
+		byte[] buffer = new byte[1000];
+		int read;
+		StringBuilder tempstr = new StringBuilder("");
+		while ((read = in.read(buffer)) != -1)
+			tempstr.append(new String(buffer, 0, read, "ISO-8859-1"));
+
+		if (tempstr.equals("show")) {
+			PrintWriter out = resp.getWriter();
+			for (int i = 0; i < lst.size(); i++)
+				out.println("message nu: " + (i + 1) + " : " + lst.get(i));
+		} else if (tempstr.equals("size")) {
+			PrintWriter out = resp.getWriter();
+			for (int i = 0; i < lst.size(); i++)
+				out.println("list size = " + lst.size());
+		}
+
 	}
 
 	ArrayList<String> lst = new ArrayList<String>();
@@ -35,10 +49,18 @@ class TCPServer extends HttpServlet {
 		StringBuilder tempstr = new StringBuilder("");
 		while ((read = in.read(buffer)) != -1)
 			tempstr.append(new String(buffer, 0, read, "ISO-8859-1"));
-		if (tempstr.toString().equals("clear"))
+		if (tempstr.toString().equals("clear")) {
 			lst.clear();
-		else
-			lst.add(tempstr.toString());
+			System.gc();
+		} else {
+			int len = new Integer(tempstr.toString());
+			String tmp = "";
+			for (int i = 0; i < 30; i++) {
+				tmp += (char) ('a' + (int) (Math.random() * 26));
+			}
+			for (int i = 0; i < len; i++)
+				lst.add(i + " " + tmp);
+		}
 		PrintWriter out = resp.getWriter();
 		out.println("F U 2abrahim-from post");
 	}
