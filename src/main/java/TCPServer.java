@@ -24,7 +24,7 @@ class TCPServer extends HttpServlet {
 		global++;
 		try {
 			int cnt = 0;
-			while (true) {
+			while (cnt < 10) {
 				PrintWriter out = resp.getWriter();
 				out.println("response : " + cnt++ + "request nu: " + global);
 				Thread.sleep(1000);
