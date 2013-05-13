@@ -19,13 +19,7 @@ class TCPServer extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		InputStream in = req.getInputStream();
-		byte[] buffer = new byte[1000];
-		int read;
-		StringBuilder tempstr = new StringBuilder("");
-		while ((read = in.read(buffer)) != -1)
-			tempstr.append(new String(buffer, 0, read, "ISO-8859-1"));
-
+		String tempstr = req.getParameter("req");
 		PrintWriter out = resp.getWriter();
 		out.println("request: " + tempstr);
 
