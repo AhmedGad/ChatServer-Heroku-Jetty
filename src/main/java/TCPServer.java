@@ -40,7 +40,9 @@ class TCPServer extends HttpServlet {
 					out.flush();
 					write = 0;
 				}
-				// Thread.sleep(1000);
+				out.println("write = " + write);
+				out.flush();
+				Thread.sleep(100);
 			}
 			// String tempstr = req.getParameter("req");
 			// PrintWriter out = resp.getWriter();
