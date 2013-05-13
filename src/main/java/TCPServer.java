@@ -19,20 +19,26 @@ class TCPServer extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		String tempstr = req.getParameter("req");
-		PrintWriter out = resp.getWriter();
-		out.println("request: " + tempstr);
+		try {
+			String tempstr = req.getParameter("req");
+			PrintWriter out = resp.getWriter();
+			out.println("request: " + tempstr);
 
-		if (tempstr.equals("show")) {
-			out = resp.getWriter();
-			for (int i = 0; i < lst.size(); i++)
-				out.println("message nu: " + (i + 1) + " : " + lst.get(i));
-		} else if (tempstr.equals("size")) {
-			out = resp.getWriter();
-			for (int i = 0; i < lst.size(); i++)
-				out.println("list size = " + lst.size());
+			if (tempstr.equals("0")) {
+				out = resp.getWriter();
+				for (int i = 0; i < lst.size(); i++)
+					out.println("message nu: " + (i + 1) + " : " + lst.get(i));
+			} else if (tempstr.equals("1")) {
+				out = resp.getWriter();
+				for (int i = 0; i < lst.size(); i++)
+					out.println("list size = " + lst.size());
+			}
+			out.close();
+		} catch (Exception e) {
+			PrintWriter out = resp.getWriter();
+			out.println("server work");
+			out.close();
 		}
-
 	}
 
 	ArrayList<String> lst = new ArrayList<String>();
