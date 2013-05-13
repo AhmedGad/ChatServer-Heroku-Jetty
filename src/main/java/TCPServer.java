@@ -29,11 +29,13 @@ class TCPServer extends HttpServlet {
 			throws ServletException, IOException {
 		global++;
 		int cur = global;
+		PrintWriter out = resp.getWriter();
+		out.println("request nu: " + cur + " started.");
+		out.flush();
 		try {
 			int cnt = 0;
 			while (true) {
 				if (write == cur) {
-					PrintWriter out = resp.getWriter();
 					out.println("response : " + cnt++ + "request nu: " + cur);
 					out.flush();
 					write = 0;
@@ -54,7 +56,7 @@ class TCPServer extends HttpServlet {
 			// }
 			// out.close();
 		} catch (Exception e) {
-			PrintWriter out = resp.getWriter();
+			out = resp.getWriter();
 			out.println("server work");
 			out.close();
 		}
