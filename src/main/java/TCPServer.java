@@ -1,4 +1,5 @@
 import java.io.IOException;
+
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ class TCPServer extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		global++;
 		try {
 			int cnt = 0;
 			while (true) {
@@ -45,6 +47,7 @@ class TCPServer extends HttpServlet {
 			out.println("server work");
 			out.close();
 		}
+		global--;
 	}
 
 	ArrayList<String> lst = new ArrayList<String>();
