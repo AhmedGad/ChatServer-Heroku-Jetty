@@ -1,5 +1,7 @@
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -18,14 +20,27 @@ class TCPServer extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		PrintWriter out = resp.getWriter();
-		out.println("F U 2abrahim");
+		for (int i = 0; i < lst.size(); i++)
+			out.println("message nu: " + (i + 1) + " : " + lst.get(i));
 	}
+
+	ArrayList<String> lst = new ArrayList<String>();
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		InputStream in = req.getInputStream();
+		byte[] buffer = new byte[1000];
+		int read;
+		StringBuilder tempstr = new StringBuilder("");
+		while ((read = in.read(buffer)) != -1)
+			tempstr.append(new String(buffer, 0, read, "ISO-8859-1"));
+		if (tempstr.toString().equals("clear"))
+			lst.clear();
+		else
+			lst.add(tempstr.toString());
 		PrintWriter out = resp.getWriter();
-		out.println("F U 2abrahim-with post");
+		out.println("F U 2abrahim-from post");
 	}
 
 	public static void main(String[] args) throws Exception {
