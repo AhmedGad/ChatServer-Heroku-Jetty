@@ -22,18 +22,23 @@ class TCPServer extends HttpServlet {
 
 	}
 
+	int write = 0;
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-
 		global++;
+		int cur = global;
 		try {
 			int cnt = 0;
-			while (cnt < 10) {
-				PrintWriter out = resp.getWriter();
-				out.println("response : " + cnt++ + "request nu: " + global);
-				out.flush();
-				Thread.sleep(1000);
+			while (true) {
+				if (write == cur) {
+					PrintWriter out = resp.getWriter();
+					out.println("response : " + cnt++ + "request nu: " + global);
+					out.flush();
+					write = 0;
+				}
+				// Thread.sleep(1000);
 			}
 			// String tempstr = req.getParameter("req");
 			// PrintWriter out = resp.getWriter();
@@ -61,26 +66,28 @@ class TCPServer extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+
 		InputStream in = req.getInputStream();
 		byte[] buffer = new byte[1000];
 		int read;
 		StringBuilder tempstr = new StringBuilder("");
 		while ((read = in.read(buffer)) != -1)
 			tempstr.append(new String(buffer, 0, read, "ISO-8859-1"));
-		if (tempstr.toString().equals("clear")) {
-			lst.clear();
-			System.gc();
-		} else {
-			int len = new Integer(tempstr.toString());
-			String tmp = "";
-			for (int i = 0; i < 30; i++) {
-				tmp += (char) ('a' + (int) (Math.random() * 26));
-			}
-			for (int i = 0; i < len; i++)
-				lst.add(i + " " + tmp);
-		}
-		PrintWriter out = resp.getWriter();
-		out.println("F U 2abrahim-from post");
+		write = new Integer(tempstr.toString());
+		// if (tempstr.toString().equals("clear")) {
+		// lst.clear();
+		// System.gc();
+		// } else {
+		// int len = new Integer(tempstr.toString());
+		// String tmp = "";
+		// for (int i = 0; i < 30; i++) {
+		// tmp += (char) ('a' + (int) (Math.random() * 26));
+		// }
+		// for (int i = 0; i < len; i++)
+		// lst.add(i + " " + tmp);
+		// }
+		// PrintWriter out = resp.getWriter();
+		// out.println("F U 2abrahim-from post");
 	}
 
 	public static void main(String[] args) throws Exception {
