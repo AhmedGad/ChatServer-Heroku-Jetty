@@ -25,10 +25,10 @@ class TCPServer extends HttpServlet {
 		StringBuilder tempstr = new StringBuilder("");
 		while ((read = in.read(buffer)) != -1)
 			tempstr.append(new String(buffer, 0, read, "ISO-8859-1"));
-		
+
 		PrintWriter out = resp.getWriter();
-		out.println(tempstr);
-		
+		out.println("request: " + tempstr);
+
 		if (tempstr.equals("show")) {
 			out = resp.getWriter();
 			for (int i = 0; i < lst.size(); i++)
