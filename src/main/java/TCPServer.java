@@ -15,24 +15,31 @@ import org.eclipse.jetty.servlet.ServletHolder;
 class TCPServer extends HttpServlet {
 
 	private static final long serialVersionUID = -7823703173356571077L;
+	int global = 0;
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		try {
-			String tempstr = req.getParameter("req");
-			PrintWriter out = resp.getWriter();
-			out.println("request: " + tempstr);
-
-			if (tempstr.equals("0")) {
-				out = resp.getWriter();
-				for (int i = 0; i < lst.size(); i++)
-					out.println("message nu: " + (i + 1) + " : " + lst.get(i));
-			} else if (tempstr.equals("1")) {
-				out = resp.getWriter();
-				out.println("list size = " + lst.size());
+			int cnt = 0;
+			while (true) {
+				PrintWriter out = resp.getWriter();
+				out.println("response : " + cnt++ + "request nu: " + global);
+				Thread.sleep(1000);
 			}
-			out.close();
+			// String tempstr = req.getParameter("req");
+			// PrintWriter out = resp.getWriter();
+			// out.println("request: " + tempstr);
+			//
+			// if (tempstr.equals("0")) {
+			// out = resp.getWriter();
+			// for (int i = 0; i < lst.size(); i++)
+			// out.println("message nu: " + (i + 1) + " : " + lst.get(i));
+			// } else if (tempstr.equals("1")) {
+			// out = resp.getWriter();
+			// out.println("list size = " + lst.size());
+			// }
+			// out.close();
 		} catch (Exception e) {
 			PrintWriter out = resp.getWriter();
 			out.println("server work");
