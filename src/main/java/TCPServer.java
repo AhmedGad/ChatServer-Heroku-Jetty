@@ -78,6 +78,8 @@ class TCPServer extends HttpServlet {
 		while ((read = in.read(buffer)) != -1)
 			tempstr.append(new String(buffer, 0, read, "ISO-8859-1"));
 		write = new Integer(tempstr.toString());
+		PrintWriter out = resp.getWriter();
+		out.println(write);
 		// if (tempstr.toString().equals("clear")) {
 		// lst.clear();
 		// System.gc();
