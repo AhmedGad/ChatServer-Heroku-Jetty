@@ -1,5 +1,4 @@
 import java.io.IOException;
-
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -16,51 +15,29 @@ import org.eclipse.jetty.servlet.ServletHolder;
 class TCPServer extends HttpServlet {
 
 	private static final long serialVersionUID = -7823703173356571077L;
-	int global = 0;
-
-	void message(HttpServletResponse resp) {
-
-	}
-
-	int write = 0;
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		global++;
-		int cur = global;
-		PrintWriter out = resp.getWriter();
-		out.println("request nu: " + cur + " started.");
-		out.flush();
 		try {
-			int cnt = 0;
-			while (true) {
-				if (write == cur) {
-					out.println("response : " + cnt++ + "request nu: " + cur);
-					out.flush();
-					write = 0;
-				}
-				Thread.sleep(30);
+			String tempstr = req.getParameter("req");
+			PrintWriter out = resp.getWriter();
+			out.println("request: " + tempstr);
+
+			if (tempstr.equals("0")) {
+				out = resp.getWriter();
+				for (int i = 0; i < lst.size(); i++)
+					out.println("message nu: " + (i + 1) + " : " + lst.get(i));
+			} else if (tempstr.equals("1")) {
+				out = resp.getWriter();
+				out.println("list size = " + lst.size());
 			}
-			// String tempstr = req.getParameter("req");
-			// PrintWriter out = resp.getWriter();
-			// out.println("request: " + tempstr);
-			//
-			// if (tempstr.equals("0")) {
-			// out = resp.getWriter();
-			// for (int i = 0; i < lst.size(); i++)
-			// out.println("message nu: " + (i + 1) + " : " + lst.get(i));
-			// } else if (tempstr.equals("1")) {
-			// out = resp.getWriter();
-			// out.println("list size = " + lst.size());
-			// }
-			// out.close();
+			out.close();
 		} catch (Exception e) {
-			out = resp.getWriter();
+			PrintWriter out = resp.getWriter();
 			out.println("server work");
 			out.close();
 		}
-		global--;
 	}
 
 	ArrayList<String> lst = new ArrayList<String>();
@@ -68,30 +45,26 @@ class TCPServer extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-
 		InputStream in = req.getInputStream();
 		byte[] buffer = new byte[1000];
 		int read;
 		StringBuilder tempstr = new StringBuilder("");
 		while ((read = in.read(buffer)) != -1)
 			tempstr.append(new String(buffer, 0, read, "ISO-8859-1"));
-		write = new Integer(tempstr.toString());
+		if (tempstr.toString().equals("clear")) {
+			lst.clear();
+			System.gc();
+		} else {
+			int len = new Integer(tempstr.toString());
+			String tmp = "";
+			for (int i = 0; i < 30; i++) {
+				tmp += (char) ('a' + (int) (Math.random() * 26));
+			}
+			for (int i = 0; i < len; i++)
+				lst.add(i + " " + tmp);
+		}
 		PrintWriter out = resp.getWriter();
-		out.println(write);
-		// if (tempstr.toString().equals("clear")) {
-		// lst.clear();
-		// System.gc();
-		// } else {
-		// int len = new Integer(tempstr.toString());
-		// String tmp = "";
-		// for (int i = 0; i < 30; i++) {
-		// tmp += (char) ('a' + (int) (Math.random() * 26));
-		// }
-		// for (int i = 0; i < len; i++)
-		// lst.add(i + " " + tmp);
-		// }
-		// PrintWriter out = resp.getWriter();
-		// out.println("F U 2abrahim-from post");
+		out.println("F U 2abrahim-from post");
 	}
 
 	public static void main(String[] args) throws Exception {
