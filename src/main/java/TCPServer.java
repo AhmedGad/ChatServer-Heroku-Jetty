@@ -30,8 +30,7 @@ class TCPServer extends HttpServlet {
 					out.println("message nu: " + (i + 1) + " : " + lst.get(i));
 			} else if (tempstr.equals("1")) {
 				out = resp.getWriter();
-				for (int i = 0; i < lst.size(); i++)
-					out.println("list size = " + lst.size());
+				out.println("list size = " + lst.size());
 			}
 			out.close();
 		} catch (Exception e) {
