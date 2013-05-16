@@ -88,7 +88,9 @@ class TCPServer extends HttpServlet {
 				out.flush();
 			}
 			try {
-				locks[id].wait();
+				synchronized (locks[id]) {
+					locks[id].wait();
+				}
 			} catch (InterruptedException e) {
 				out.println("exception on lock wait");
 				out.flush();
@@ -187,10 +189,9 @@ class TCPServer extends HttpServlet {
 			} else if (operation.equals("message")) {
 				String to = tok.nextToken();
 				if (reg.contains(to)) {
-					if (locks[reg.indexOf(to)] != null) {
+					synchronized (locks[reg.indexOf(to)]) {
 						locks[reg.indexOf(to)].notifyAll();
-					} else
-						out.println("NULL");
+					}
 					messages[reg.indexOf(to)] = tok.nextToken();
 				}
 			}
