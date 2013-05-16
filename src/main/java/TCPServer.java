@@ -228,6 +228,7 @@ class TCPServer extends HttpServlet {
 				String from = tok.nextToken();
 				if (reg.contains(from)) {
 					int myid = reg.indexOf(from);
+					out.println("" + otherPlayer[myid]);
 					if (otherPlayer[myid] > -1) {
 						int to = otherPlayer[myid];
 						String tmp = "";
