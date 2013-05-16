@@ -151,22 +151,24 @@ class TCPServer extends HttpServlet {
 					out.println("unregistered succsessfully");
 				}
 			} else if (operation.equals("host")) {
-				synchronized (hosts) {
-					String regName = tok.nextToken();
-					if (!reg.contains(regName)) {
-						out.println("no such name exists");
-						out.println("unregister failed");
-					} else if (hosts.contains(regName)) {
-						out.println("you are already in the host list");
-					} else {
+
+				String regName = tok.nextToken();
+				if (!reg.contains(regName)) {
+					out.println("no such name exists");
+					out.println("unregister failed");
+				} else if (hosts.contains(regName)) {
+					out.println("you are already in the host list");
+				} else {
+					synchronized (hosts) {
 						hosts.add(regName);
-						out.print(" ");
-						out.flush();
-						final int id = reg.indexOf(regName);
-						otherPlayer[id] = -1;
-						running[id] = true;
-						run(out, id);
 					}
+					// out.print(" ");
+					// out.flush();
+					final int id = reg.indexOf(regName);
+					otherPlayer[id] = -1;
+					running[id] = true;
+					run(out, id);
+
 				}
 			} else if (operation.equals("connect")) {
 				String me = tok.nextToken(), host = tok.nextToken();
