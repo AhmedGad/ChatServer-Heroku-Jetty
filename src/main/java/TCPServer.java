@@ -80,7 +80,7 @@ class TCPServer extends HttpServlet {
 		out.println(id);
 		out.println(notifycnt);
 		out.println(running[id]);
-		int cnt = 0;
+		out.flush();
 		while (running[id]) {
 			if (messages[id] != null) {
 				out.print(messages[id]);
@@ -88,14 +88,11 @@ class TCPServer extends HttpServlet {
 				out.flush();
 			}
 			try {
-				Thread.sleep(10);
+				locks[id].wait();
 			} catch (InterruptedException e) {
-				out.println("exception");
-				out.println(e.toString());
+				out.println("exception on lock wait");
+				out.flush();
 			}
-			out.println(running[id]);
-			out.flush();
-			cnt = 0;
 		}
 		notifycnt--;
 	}
@@ -183,14 +180,16 @@ class TCPServer extends HttpServlet {
 				if (reg.contains(name)) {
 					final int id = reg.indexOf(name);
 					running[id] = true;
-					run(out, id);
 					out.println("reconnected succsessfully");
+					run(out, id);
 				} else
 					out.println("reconnect failed");
 			} else if (operation.equals("message")) {
 				String to = tok.nextToken();
-				if (reg.contains(to))
+				if (reg.contains(to)) {
+					locks[reg.indexOf(to)].notifyAll();
 					messages[reg.indexOf(to)] = tok.nextToken();
+				}
 			}
 		} else {
 			out.println("incorrect password");
