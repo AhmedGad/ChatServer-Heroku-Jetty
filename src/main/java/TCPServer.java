@@ -141,6 +141,20 @@ class TCPServer extends HttpServlet {
 					out.println("no such name exists");
 					out.println("unregister failed");
 				} else {
+					int from = reg.indexOf(regName);
+					if (otherPlayer[from] > -1) {
+						for (int i = 0; i < games.size(); i++)
+							if (games.get(i).pl1 == from
+									|| games.get(i).pl2 == from) {
+								games.remove(i);
+								break;
+							}
+						int to = otherPlayer[from];
+						messages[to].add(reg.get(from) + " DISCONNECTED");
+						synchronized (locks[to]) {
+							locks[to].notifyAll();
+						}
+					}
 					running[reg.indexOf(regName)] = false;
 					messages[reg.indexOf(regName)].clear();
 					synchronized (locks[reg.indexOf(regName)]) {
@@ -198,6 +212,22 @@ class TCPServer extends HttpServlet {
 				if (reg.contains(name)) {
 					if (hosts.contains(name))
 						hosts.remove(name);
+
+					int from = reg.indexOf(name);
+					if (otherPlayer[from] > -1) {
+						for (int i = 0; i < games.size(); i++)
+							if (games.get(i).pl1 == from
+									|| games.get(i).pl2 == from) {
+								games.remove(i);
+								break;
+							}
+						int to = otherPlayer[from];
+						messages[to].add(reg.get(from) + " DISCONNECTED");
+						synchronized (locks[to]) {
+							locks[to].notifyAll();
+						}
+					}
+
 					out.println(running[reg.indexOf(name)]);
 					running[reg.indexOf(name)] = false;
 					synchronized (locks[reg.indexOf(name)]) {
@@ -231,7 +261,6 @@ class TCPServer extends HttpServlet {
 				String from = tok.nextToken();
 				if (reg.contains(from)) {
 					int myid = reg.indexOf(from);
-					out.println(otherPlayer[myid] + " " + myid);
 					if (otherPlayer[myid] > -1) {
 						int to = otherPlayer[myid];
 						if (!tok.hasMoreTokens()) {
@@ -246,7 +275,6 @@ class TCPServer extends HttpServlet {
 							}
 							out.println("message sent successfully");
 						}
-
 					}
 				}
 			} else if (operation == "endGame") {
@@ -254,6 +282,14 @@ class TCPServer extends HttpServlet {
 				if (reg.contains(me)) {
 					int from = reg.indexOf(me), to;
 					if (otherPlayer[from] > -1) {
+
+						for (int i = 0; i < games.size(); i++)
+							if (games.get(i).pl1 == from
+									|| games.get(i).pl2 == from) {
+								games.remove(i);
+								break;
+							}
+
 						to = otherPlayer[from];
 						otherPlayer[from] = -1;
 						otherPlayer[to] = -1;
