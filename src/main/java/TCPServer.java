@@ -62,7 +62,7 @@ class TCPServer extends HttpServlet {
 				} else if (tempstr.equals("hosts")) {
 					out.println("num of hosts: " + hosts.size());
 					for (int i = 0; i < hosts.size(); i++)
-						out.println(reg.get(i));
+						out.println(hosts.get(i));
 				} else if (tempstr.equals("games")) {
 					out.println("num of live games: " + games.size());
 					for (int i = 0; i < games.size(); i++)
@@ -205,7 +205,7 @@ class TCPServer extends HttpServlet {
 						e.printStackTrace();
 					}
 					running[id] = true;
-					out.println("reconnected succsessfully");
+					// out.println("reconnected succsessfully");
 					run(out, id);
 				} else
 					out.println("reconnect failed");
