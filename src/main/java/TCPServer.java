@@ -79,7 +79,6 @@ class TCPServer extends HttpServlet {
 		notifycnt++;
 		out.println(id);
 		out.println(notifycnt);
-		out.println(running[id]);
 		out.flush();
 		while (running[id]) {
 			if (messages[id] != null) {
@@ -95,6 +94,7 @@ class TCPServer extends HttpServlet {
 				out.println("exception on lock wait");
 				out.flush();
 			}
+			out.println(running[id]);
 		}
 		notifycnt--;
 	}
