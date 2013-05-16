@@ -178,9 +178,7 @@ class TCPServer extends HttpServlet {
 			} else if (operation.equals("message")) {
 				String to = tok.nextToken();
 				if (reg.contains(to))
-					synchronized (messages[reg.indexOf(to)]) {
-						messages[reg.indexOf(to)] = tok.nextToken();
-					}
+					messages[reg.indexOf(to)] = tok.nextToken();
 			}
 		} else {
 			out.println("incorrect password");
