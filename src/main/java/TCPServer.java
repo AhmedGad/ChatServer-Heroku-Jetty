@@ -173,13 +173,14 @@ class TCPServer extends HttpServlet {
 				if (!reg.contains(me) || !reg.contains(host)) {
 					out.println("no such name exists");
 					out.println("connect failed");
-				} else if (hosts.contains(req)) {
+				} else if (hosts.contains(me)) {
 					out.println("you are already in the host list");
 				} else {
 					final Game g;
 					games.add(g = new Game(reg.indexOf(host), reg.indexOf(me)));
 					hosts.remove(host);
 					messages[reg.indexOf(host)].add(me + " " + "connected");
+					messages[reg.indexOf(host)].add(g.pl1 + " " + g.pl2);
 					synchronized (locks[reg.indexOf(host)]) {
 						locks[reg.indexOf(host)].notifyAll();
 					}
@@ -228,7 +229,7 @@ class TCPServer extends HttpServlet {
 				String from = tok.nextToken();
 				if (reg.contains(from)) {
 					int myid = reg.indexOf(from);
-					out.println("" + otherPlayer[myid]);
+					out.println(otherPlayer[myid] + " " + myid);
 					if (otherPlayer[myid] > -1) {
 						int to = otherPlayer[myid];
 						String tmp = "";
