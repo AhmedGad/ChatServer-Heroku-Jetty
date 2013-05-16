@@ -26,11 +26,12 @@ class TCPServer extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	static ArrayList<String> messages[] = new ArrayList[max];
 	static Object locks[] = new Object[max];
-
+	static int cnt = 0;
 	static {
+		cnt++;
 		for (int i = 0; i < max; i++) {
 			locks[i] = new Object();
-			otherPlayer[i] = -1;
+			otherPlayer[i] = cnt * -1;
 			messages[i] = new ArrayList<String>();
 		}
 	}
