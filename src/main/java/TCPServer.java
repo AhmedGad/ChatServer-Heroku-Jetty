@@ -20,18 +20,22 @@ class TCPServer extends HttpServlet {
 	ArrayList<String> hosts = new ArrayList<String>();
 	ArrayList<Game> games = new ArrayList<Game>();
 
-	boolean running[] = new boolean[max];
-	int otherPlayer[] = new int[max];
-	String messages[] = new String[max];
-	static Object locks[] = new Object[100];
+	static int notifycnt = 0, max = 100;
+	static boolean running[] = new boolean[max];
+	static int otherPlayer[] = new int[max];
+	@SuppressWarnings("unchecked")
+	static ArrayList<String> messages[] = new ArrayList[max];
+	static Object locks[] = new Object[max];
 
 	static {
-		for (int i = 0; i < locks.length; i++)
+		for (int i = 0; i < max; i++) {
 			locks[i] = new Object();
+			otherPlayer[i] = -1;
+			messages[i] = new ArrayList<String>();
+		}
 	}
 
 	static String Password = "androidelteety";
-	static int notifycnt = 0, max = 100;
 
 	class Game {
 		int pl1, pl2;
@@ -64,6 +68,8 @@ class TCPServer extends HttpServlet {
 					for (int i = 0; i < games.size(); i++)
 						out.println(reg.get(games.get(i).pl1) + " --> "
 								+ reg.get(games.get(i).pl2));
+				} else if (tempstr.equals("messages")) {
+
 				}
 			} else
 				out.println("server works!");
@@ -81,9 +87,10 @@ class TCPServer extends HttpServlet {
 		out.println(notifycnt);
 		out.flush();
 		while (running[id]) {
-			if (messages[id] != null) {
-				out.print(messages[id]);
-				messages[id] = null;
+			if (messages[id].size() > 0) {
+				for (int i = 0; i < messages[id].size(); i++)
+					out.print(messages[id].get(i));
+				messages[id].clear();
 				out.flush();
 			}
 			try {
@@ -94,7 +101,6 @@ class TCPServer extends HttpServlet {
 				out.println("exception on lock wait");
 				out.flush();
 			}
-			out.println(running[id]);
 		}
 		notifycnt--;
 	}
@@ -173,6 +179,9 @@ class TCPServer extends HttpServlet {
 				if (reg.contains(name)) {
 					out.println(running[reg.indexOf(name)]);
 					running[reg.indexOf(name)] = false;
+					synchronized (locks[reg.indexOf(name)]) {
+						locks[reg.indexOf(name)].notifyAll();
+					}
 					out.println(running[reg.indexOf(name)]);
 					out.println("diconnected succsessfully");
 				} else
@@ -189,10 +198,11 @@ class TCPServer extends HttpServlet {
 			} else if (operation.equals("message")) {
 				String to = tok.nextToken();
 				if (reg.contains(to)) {
+					messages[reg.indexOf(to)].add(tok.nextToken());
 					synchronized (locks[reg.indexOf(to)]) {
 						locks[reg.indexOf(to)].notifyAll();
 					}
-					messages[reg.indexOf(to)] = tok.nextToken();
+					out.println("message sent successfully");
 				}
 			}
 		} else {
