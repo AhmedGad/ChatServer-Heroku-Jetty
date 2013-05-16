@@ -100,94 +100,80 @@ class TCPServer extends HttpServlet {
 
 		StringTokenizer tok = new StringTokenizer(s);
 		if (tok.nextToken().equals(Password)) {
-			synchronized (reg) {
-				String operation = tok.nextToken();
-				if (operation.equals("register")) {
-					String regName = tok.nextToken();
-					if (reg.contains(regName)) {
-						out.println("name already exists");
-						out.println("registered failed");
-					} else {
-						reg.add(regName);
-						out.println("registered succsessfully");
-					}
-				} else if (operation.equals("unregister")) {
+			String operation = tok.nextToken();
+			if (operation.equals("register")) {
+				String regName = tok.nextToken();
+				if (reg.contains(regName)) {
+					out.println("name already exists");
+					out.println("registered failed");
+				} else {
+					reg.add(regName);
+					out.println("registered succsessfully");
+				}
+			} else if (operation.equals("unregister")) {
+				String regName = tok.nextToken();
+				if (!reg.contains(regName)) {
+					out.println("no such name exists");
+					out.println("unregister failed");
+				} else {
+					reg.remove(regName);
+					out.println("unregistered succsessfully");
+				}
+			} else if (operation.equals("host")) {
+				synchronized (hosts) {
 					String regName = tok.nextToken();
 					if (!reg.contains(regName)) {
 						out.println("no such name exists");
 						out.println("unregister failed");
-					} else {
-						reg.remove(regName);
-						out.println("unregistered succsessfully");
-					}
-				} else if (operation.equals("host")) {
-					synchronized (hosts) {
-						String regName = tok.nextToken();
-						if (!reg.contains(regName)) {
-							out.println("no such name exists");
-							out.println("unregister failed");
-						} else if (hosts.contains(regName)) {
-							out.println("you are already in the host list");
-						} else {
-							hosts.add(regName);
-							out.println("host done succsessfully");
-							final int id = reg.indexOf(regName);
-							otherPlayer[id] = -1;
-							running[id] = true;
-							new Thread(new Runnable() {
-								public void run() {
-									TCPServer.this.run(out, id);
-								}
-							});
-						}
-					}
-				} else if (operation.equals("connect")) {
-					String me = tok.nextToken(), host = tok.nextToken();
-					if (!reg.contains(me) || !reg.contains(host)) {
-						out.println("no such name exists");
-						out.println("connect failed");
-					} else if (hosts.contains(req)) {
+					} else if (hosts.contains(regName)) {
 						out.println("you are already in the host list");
 					} else {
-						final Game g;
-						synchronized (games) {
-							games.add(g = new Game(reg.indexOf(host), reg
-									.indexOf(me)));
-							otherPlayer[g.pl1] = otherPlayer[g.pl2];
-							otherPlayer[g.pl2] = otherPlayer[g.pl1];
-						}
-						running[g.pl2] = true;
-						new Thread(new Runnable() {
-							public void run() {
-								TCPServer.this.run(out, g.pl2);
-							}
-						});
-					}
-				} else if (operation.equals("disconnect")) {
-					String name = tok.nextToken();
-					if (reg.contains(name)) {
-						running[reg.indexOf(name)] = false;
-						out.println("diconnected succsessfully");
-					} else
-						out.println("diconnect failed");
-				} else if (operation.equals("reconnect")) {
-					String name = tok.nextToken();
-					if (reg.contains(name)) {
-						final int id = reg.indexOf(name);
+						hosts.add(regName);
+						out.println("host done succsessfully");
+						final int id = reg.indexOf(regName);
+						otherPlayer[id] = -1;
 						running[id] = true;
-						new Thread(new Runnable() {
-							public void run() {
-								TCPServer.this.run(out, id);
-							}
-						});
-						out.println("reconnected succsessfully");
-					} else
-						out.println("reconnect failed");
-				} else if (operation.equals("message")) {
-					String to = tok.nextToken();
-					if (reg.contains(to))
-						messages[reg.indexOf(to)] = tok.nextToken();
+						run(out, id);
+					}
 				}
+			} else if (operation.equals("connect")) {
+				String me = tok.nextToken(), host = tok.nextToken();
+				if (!reg.contains(me) || !reg.contains(host)) {
+					out.println("no such name exists");
+					out.println("connect failed");
+				} else if (hosts.contains(req)) {
+					out.println("you are already in the host list");
+				} else {
+					final Game g;
+					synchronized (games) {
+						games.add(g = new Game(reg.indexOf(host), reg
+								.indexOf(me)));
+						otherPlayer[g.pl1] = otherPlayer[g.pl2];
+						otherPlayer[g.pl2] = otherPlayer[g.pl1];
+					}
+					running[g.pl2] = true;
+					run(out, g.pl2);
+				}
+			} else if (operation.equals("disconnect")) {
+				String name = tok.nextToken();
+				if (reg.contains(name)) {
+					running[reg.indexOf(name)] = false;
+					out.println("diconnected succsessfully");
+				} else
+					out.println("diconnect failed");
+			} else if (operation.equals("reconnect")) {
+				String name = tok.nextToken();
+				if (reg.contains(name)) {
+					final int id = reg.indexOf(name);
+					running[id] = true;
+					run(out, id);
+					out.println("reconnected succsessfully");
+				} else
+					out.println("reconnect failed");
+			} else if (operation.equals("message")) {
+				String to = tok.nextToken();
+				if (reg.contains(to))
+					messages[reg.indexOf(to)] = tok.nextToken();
 			}
 		} else {
 			out.println("incorrect password");
