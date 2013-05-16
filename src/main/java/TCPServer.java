@@ -153,7 +153,8 @@ class TCPServer extends HttpServlet {
 						out.println("you are already in the host list");
 					} else {
 						hosts.add(regName);
-						out.println("host done succsessfully");
+						out.print(" ");
+						out.flush();
 						final int id = reg.indexOf(regName);
 						otherPlayer[id] = -1;
 						running[id] = true;
@@ -171,6 +172,12 @@ class TCPServer extends HttpServlet {
 					final Game g;
 					games.add(g = new Game(reg.indexOf(host), reg.indexOf(me)));
 					hosts.remove(host);
+					messages[reg.indexOf(host)].add(me + " " + "connected");
+					synchronized (locks[reg.indexOf(host)]) {
+						locks[reg.indexOf(host)].notifyAll();
+					}
+					out.print(" ");
+					out.flush();
 					otherPlayer[g.pl1] = otherPlayer[g.pl2];
 					otherPlayer[g.pl2] = otherPlayer[g.pl1];
 					running[g.pl2] = true;
