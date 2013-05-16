@@ -85,10 +85,11 @@ class TCPServer extends HttpServlet {
 				out.print(messages[id]);
 				messages[id] = null;
 			}
+			out.flush();
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				out.println("exception");
 				out.println(e.toString());
 			}
 			out.println(running[id]);
