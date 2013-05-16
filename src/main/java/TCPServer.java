@@ -69,7 +69,13 @@ class TCPServer extends HttpServlet {
 						out.println(reg.get(games.get(i).pl1) + " --> "
 								+ reg.get(games.get(i).pl2));
 				} else if (tempstr.equals("messages")) {
-
+					for (int i = 0; i < reg.size(); i++) {
+						out.println(reg.get(i) + " :");
+						for (int j = 0; j < messages[i].size(); j++) {
+							out.println(reg.get(j));
+						}
+						out.print("\n");
+					}
 				}
 			} else
 				out.println("server works!");
