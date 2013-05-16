@@ -89,7 +89,7 @@ class TCPServer extends HttpServlet {
 		while (running[id]) {
 			if (messages[id].size() > 0) {
 				for (int i = 0; i < messages[id].size(); i++)
-					out.print(messages[id].get(i));
+					out.println(messages[id].get(i));
 				messages[id].clear();
 				out.flush();
 			}
@@ -190,6 +190,16 @@ class TCPServer extends HttpServlet {
 				String name = tok.nextToken();
 				if (reg.contains(name)) {
 					final int id = reg.indexOf(name);
+					running[id] = false;
+					synchronized (locks[id]) {
+						locks[id].notifyAll();
+					}
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					running[id] = true;
 					out.println("reconnected succsessfully");
 					run(out, id);
