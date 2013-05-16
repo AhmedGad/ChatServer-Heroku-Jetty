@@ -77,16 +77,15 @@ class TCPServer extends HttpServlet {
 
 	void run(PrintWriter out, int id) {
 		notifycnt++;
-		try {
-			while (running[id]) {
-				if (messages[id] != null) {
-					out.print(messages[id]);
-					messages[id] = null;
-				}
+		out.println(id);
+		out.println(notifycnt);
+		out.println(running[id]);
+		while (running[id]) {
+			if (messages[id] != null) {
+				out.print(messages[id]);
+				messages[id] = null;
 			}
-		} catch (Exception e) {
-			out.print(e.toString());
-			notifycnt--;
+			out.println(running[id]);
 		}
 		notifycnt--;
 	}
@@ -94,6 +93,7 @@ class TCPServer extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+
 		InputStream in = req.getInputStream();
 		final PrintWriter out = resp.getWriter();
 
