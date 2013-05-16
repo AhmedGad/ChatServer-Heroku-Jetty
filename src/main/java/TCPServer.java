@@ -92,10 +92,11 @@ class TCPServer extends HttpServlet {
 		out.flush();
 		while (running[id]) {
 			if (messages[id].size() > 0) {
-				for (int i = 0; i < messages[id].size(); i++)
+				for (int i = 0; i < messages[id].size(); i++) {
 					out.println(messages[id].get(i));
+					out.flush();
+				}
 				messages[id].clear();
-				out.flush();
 			}
 			try {
 				synchronized (locks[id]) {
