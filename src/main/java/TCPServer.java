@@ -205,7 +205,7 @@ class TCPServer extends HttpServlet {
 						e.printStackTrace();
 					}
 					running[id] = true;
-					out.println("reconnected succsessfully");
+					out.print(" ");
 					run(out, id);
 				} else
 					out.println("reconnect failed");
