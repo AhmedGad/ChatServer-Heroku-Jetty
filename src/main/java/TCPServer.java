@@ -145,6 +145,8 @@ class TCPServer extends HttpServlet {
 					synchronized (locks[reg.indexOf(regName)]) {
 						locks[reg.indexOf(regName)].notifyAll();
 					}
+					if (hosts.contains(regName))
+						hosts.remove(regName);
 					reg.remove(regName);
 					out.println("unregistered succsessfully");
 				}
