@@ -231,14 +231,19 @@ class TCPServer extends HttpServlet {
 					out.println(otherPlayer[myid] + " " + myid);
 					if (otherPlayer[myid] > -1) {
 						int to = otherPlayer[myid];
-						String tmp = "";
-						while (tok.hasMoreTokens())
-							tmp += tok.nextToken();
-						messages[to].add(tmp);
-						synchronized (locks[to]) {
-							locks[to].notifyAll();
+						if (!tok.hasMoreTokens()) {
+							out.println("message sent failed");
+						} else {
+							String tmp = tok.nextToken();
+							while (tok.hasMoreTokens())
+								tmp += " " + tok.nextToken();
+							messages[to].add(tmp);
+							synchronized (locks[to]) {
+								locks[to].notifyAll();
+							}
+							out.println("message sent successfully");
 						}
-						out.println("message sent successfully");
+
 					}
 				}
 			} else if (operation == "endGame") {
