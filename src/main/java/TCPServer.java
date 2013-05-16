@@ -16,6 +16,8 @@ class TCPServer extends HttpServlet {
 
 	private static final long serialVersionUID = -7823703173356571077L;
 
+	ArrayList<String> lst = new ArrayList<String>();
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -40,31 +42,45 @@ class TCPServer extends HttpServlet {
 		}
 	}
 
-	ArrayList<String> lst = new ArrayList<String>();
+	String Password = "androidelteety";
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		InputStream in = req.getInputStream();
+		PrintWriter out = resp.getWriter();
+
 		byte[] buffer = new byte[1000];
 		int read;
-		StringBuilder tempstr = new StringBuilder("");
+		String tempstr = "";
 		while ((read = in.read(buffer)) != -1)
-			tempstr.append(new String(buffer, 0, read, "ISO-8859-1"));
-		if (tempstr.toString().equals("clear")) {
-			lst.clear();
-			System.gc();
-		} else {
-			int len = new Integer(tempstr.toString());
-			String tmp = "";
-			for (int i = 0; i < 30; i++) {
-				tmp += (char) ('a' + (int) (Math.random() * 26));
-			}
-			for (int i = 0; i < len; i++)
-				lst.add(i + " " + tmp);
-		}
-		PrintWriter out = resp.getWriter();
-		out.println("F U 2abrahim-from post");
+			tempstr += new String(buffer, 0, read, "ISO-8859-1");
+
+		out.println(tempstr);
+		out.println("Please Enter Password");
+
+		tempstr = "";
+		req.getInputStream();
+		while ((read = in.read(buffer)) != -1)
+			tempstr += new String(buffer, 0, read, "ISO-8859-1");
+
+		out = resp.getWriter();
+		out.println(tempstr);
+		out.println("registered succsessfully");
+
+		// if (tempstr.toString().equals("clear")) {
+		// lst.clear();
+		// System.gc();
+		// } else {
+		// int len = new Integer(tempstr.toString());
+		// String tmp = "";
+		// for (int i = 0; i < 30; i++) {
+		// tmp += (char) ('a' + (int) (Math.random() * 26));
+		// }
+		// for (int i = 0; i < len; i++)
+		// lst.add(i + " " + tmp);
+		// }
+
 	}
 
 	public static void main(String[] args) throws Exception {
