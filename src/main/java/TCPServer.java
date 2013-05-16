@@ -140,6 +140,11 @@ class TCPServer extends HttpServlet {
 					out.println("no such name exists");
 					out.println("unregister failed");
 				} else {
+					running[reg.indexOf(regName)] = false;
+					messages[reg.indexOf(regName)].clear();
+					synchronized (locks[reg.indexOf(regName)]) {
+						locks[reg.indexOf(regName)].notifyAll();
+					}
 					reg.remove(regName);
 					out.println("unregistered succsessfully");
 				}
