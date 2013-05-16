@@ -26,12 +26,11 @@ class TCPServer extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	static ArrayList<String> messages[] = new ArrayList[max];
 	static Object locks[] = new Object[max];
-	static int cnt = 0;
+
 	static {
-		cnt++;
 		for (int i = 0; i < max; i++) {
 			locks[i] = new Object();
-			otherPlayer[i] = cnt * -1;
+			otherPlayer[i] = -1;
 			messages[i] = new ArrayList<String>();
 		}
 	}
@@ -181,14 +180,13 @@ class TCPServer extends HttpServlet {
 					games.add(g = new Game(reg.indexOf(host), reg.indexOf(me)));
 					hosts.remove(host);
 					messages[reg.indexOf(host)].add(me + " " + "connected");
-					messages[reg.indexOf(host)].add(g.pl1 + " " + g.pl2);
 					synchronized (locks[reg.indexOf(host)]) {
 						locks[reg.indexOf(host)].notifyAll();
 					}
 					out.print(" ");
 					out.flush();
-					otherPlayer[g.pl1] = otherPlayer[g.pl2];
-					otherPlayer[g.pl2] = otherPlayer[g.pl1];
+					otherPlayer[g.pl1] = g.pl2;
+					otherPlayer[g.pl2] = g.pl1;
 					running[g.pl2] = true;
 					run(out, g.pl2);
 				}
