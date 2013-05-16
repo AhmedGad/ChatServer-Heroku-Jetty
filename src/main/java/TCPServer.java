@@ -77,11 +77,16 @@ class TCPServer extends HttpServlet {
 
 	void run(PrintWriter out, int id) {
 		notifycnt++;
-		while (running[id]) {
-			if (messages[id] != null) {
-				out.print(messages[id]);
-				messages[id] = null;
+		try {
+			while (running[id]) {
+				if (messages[id] != null) {
+					out.print(messages[id]);
+					messages[id] = null;
+				}
 			}
+		} catch (Exception e) {
+			out.print(e.toString());
+			notifycnt--;
 		}
 		notifycnt--;
 	}
