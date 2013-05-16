@@ -93,11 +93,9 @@ class TCPServer extends HttpServlet {
 				out.println("exception");
 				out.println(e.toString());
 			}
-			if (cnt > 100) {
-				out.println(running[id]);
-				out.flush();
-				cnt = 0;
-			}
+			out.println(running[id]);
+			out.flush();
+			cnt = 0;
 		}
 		notifycnt--;
 	}
