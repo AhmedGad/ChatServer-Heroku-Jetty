@@ -187,7 +187,10 @@ class TCPServer extends HttpServlet {
 			} else if (operation.equals("message")) {
 				String to = tok.nextToken();
 				if (reg.contains(to)) {
-					locks[reg.indexOf(to)].notifyAll();
+					if (locks[reg.indexOf(to)] != null) {
+						locks[reg.indexOf(to)].notifyAll();
+					} else
+						out.println("NULL");
 					messages[reg.indexOf(to)] = tok.nextToken();
 				}
 			}
