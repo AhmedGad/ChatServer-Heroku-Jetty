@@ -87,13 +87,13 @@ class TCPServer extends HttpServlet {
 				messages[id] = null;
 				out.flush();
 			}
-			// try {
-			// Thread.sleep(2000);
-			// } catch (InterruptedException e) {
-			// out.println("exception");
-			// out.println(e.toString());
-			// }
-			if (cnt > 10000) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				out.println("exception");
+				out.println(e.toString());
+			}
+			if (cnt > 100) {
 				out.println(running[id]);
 				out.flush();
 				cnt = 0;
