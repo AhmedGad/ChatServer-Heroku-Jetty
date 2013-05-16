@@ -162,8 +162,8 @@ class TCPServer extends HttpServlet {
 					synchronized (hosts) {
 						hosts.add(regName);
 					}
-					// out.print(" ");
-					// out.flush();
+					out.print("host starts successfully");
+					out.flush();
 					final int id = reg.indexOf(regName);
 					otherPlayer[id] = -1;
 					running[id] = true;
@@ -185,7 +185,7 @@ class TCPServer extends HttpServlet {
 					synchronized (locks[reg.indexOf(host)]) {
 						locks[reg.indexOf(host)].notifyAll();
 					}
-					out.print(" ");
+					out.print("connected to " + host + " successfully");
 					out.flush();
 					otherPlayer[g.pl1] = g.pl2;
 					otherPlayer[g.pl2] = g.pl1;
