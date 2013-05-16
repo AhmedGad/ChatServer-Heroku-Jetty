@@ -85,6 +85,12 @@ class TCPServer extends HttpServlet {
 				out.print(messages[id]);
 				messages[id] = null;
 			}
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				out.println(e.toString());
+			}
 			out.println(running[id]);
 		}
 		notifycnt--;
@@ -162,7 +168,9 @@ class TCPServer extends HttpServlet {
 			} else if (operation.equals("disconnect")) {
 				String name = tok.nextToken();
 				if (reg.contains(name)) {
+					out.println(running[reg.indexOf(name)]);
 					running[reg.indexOf(name)] = false;
+					out.println(running[reg.indexOf(name)]);
 					out.println("diconnected succsessfully");
 				} else
 					out.println("diconnect failed");
