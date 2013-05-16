@@ -89,8 +89,6 @@ class TCPServer extends HttpServlet {
 
 	void run(PrintWriter out, int id) {
 		notifycnt++;
-		out.println(id);
-		out.println(notifycnt);
 		out.flush();
 		while (running[id]) {
 			if (messages[id].size() > 0) {
@@ -171,18 +169,18 @@ class TCPServer extends HttpServlet {
 					out.println("you are already in the host list");
 				} else {
 					final Game g;
-					synchronized (games) {
-						games.add(g = new Game(reg.indexOf(host), reg
-								.indexOf(me)));
-						otherPlayer[g.pl1] = otherPlayer[g.pl2];
-						otherPlayer[g.pl2] = otherPlayer[g.pl1];
-					}
+					games.add(g = new Game(reg.indexOf(host), reg.indexOf(me)));
+					hosts.remove(host);
+					otherPlayer[g.pl1] = otherPlayer[g.pl2];
+					otherPlayer[g.pl2] = otherPlayer[g.pl1];
 					running[g.pl2] = true;
 					run(out, g.pl2);
 				}
 			} else if (operation.equals("disconnect")) {
 				String name = tok.nextToken();
 				if (reg.contains(name)) {
+					if (hosts.contains(name))
+						hosts.remove(name);
 					out.println(running[reg.indexOf(name)]);
 					running[reg.indexOf(name)] = false;
 					synchronized (locks[reg.indexOf(name)]) {
@@ -212,13 +210,40 @@ class TCPServer extends HttpServlet {
 				} else
 					out.println("reconnect failed");
 			} else if (operation.equals("message")) {
-				String to = tok.nextToken();
-				if (reg.contains(to)) {
-					messages[reg.indexOf(to)].add(tok.nextToken());
-					synchronized (locks[reg.indexOf(to)]) {
-						locks[reg.indexOf(to)].notifyAll();
+				String from = tok.nextToken();
+				if (reg.contains(from)) {
+					int myid = reg.indexOf(from);
+					if (otherPlayer[myid] > -1) {
+						int to = otherPlayer[myid];
+						String tmp = "";
+						while (tok.hasMoreTokens())
+							tmp += tok.nextToken();
+						messages[to].add(tmp);
+						synchronized (locks[to]) {
+							locks[to].notifyAll();
+						}
+						out.println("message sent successfully");
 					}
-					out.println("message sent successfully");
+				}
+			} else if (operation == "endGame") {
+				String me = tok.nextToken();
+				if (reg.contains(me)) {
+					int from = reg.indexOf(me), to;
+					if (otherPlayer[from] > -1) {
+						to = otherPlayer[from];
+						otherPlayer[from] = -1;
+						otherPlayer[to] = -1;
+						running[from] = false;
+						running[to] = false;
+						messages[from].clear();
+						messages[to].clear();
+						synchronized (locks[from]) {
+							locks[from].notifyAll();
+						}
+						synchronized (locks[to]) {
+							locks[to].notifyAll();
+						}
+					}
 				}
 			}
 		} else {
