@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletException;
@@ -23,12 +24,18 @@ class TCPServer extends HttpServlet {
 	static int notifycnt = 0, max = 100;
 	static boolean running[] = new boolean[max];
 	static int otherPlayer[] = new int[max];
+
+	static HashMap<String, Integer> idmap = new HashMap<String, Integer>();
+
+	static ArrayList<Integer> freeIds = new ArrayList<Integer>();
+
 	@SuppressWarnings("unchecked")
 	static ArrayList<String> messages[] = new ArrayList[max];
 	static Object locks[] = new Object[max];
 
 	static {
 		for (int i = 0; i < max; i++) {
+			freeIds.add(i);
 			locks[i] = new Object();
 			otherPlayer[i] = -1;
 			messages[i] = new ArrayList<String>();
@@ -38,9 +45,9 @@ class TCPServer extends HttpServlet {
 	static String Password = "androidelteety";
 
 	class Game {
-		int pl1, pl2;
+		String pl1, pl2;
 
-		public Game(int pl1, int pl2) {
+		public Game(String pl1, String pl2) {
 			this.pl1 = pl1;
 			this.pl2 = pl2;
 		}
@@ -66,8 +73,8 @@ class TCPServer extends HttpServlet {
 				} else if (tempstr.equals("games")) {
 					out.println("num of live games: " + games.size());
 					for (int i = 0; i < games.size(); i++)
-						out.println(reg.get(games.get(i).pl1) + " --> "
-								+ reg.get(games.get(i).pl2));
+						out.println(games.get(i).pl1 + " --> "
+								+ games.get(i).pl2);
 				} else if (tempstr.equals("messages")) {
 					for (int i = 0; i < reg.size(); i++) {
 						out.println(reg.get(i) + " :");
@@ -125,76 +132,96 @@ class TCPServer extends HttpServlet {
 
 		StringTokenizer tok = new StringTokenizer(s);
 		if (tok.nextToken().equals(Password)) {
+
 			String operation = tok.nextToken();
+			// ---------------------------------------------------------------------------
+			// ---------------------------------------------------------------------------
 			if (operation.equals("register")) {
 				String regName = tok.nextToken();
 				if (reg.contains(regName)) {
 					out.println("name already exists");
 					out.println("registered failed");
 				} else {
-					reg.add(regName);
-					out.println("registered succsessfully");
+					if (!freeIds.isEmpty()) {
+						reg.add(regName);
+						idmap.put(regName, freeIds.remove(freeIds.size() - 1));
+						out.println("registered succsessfully");
+					} else {
+						out.println("No place for new user!");
+						out.println("Users Limit Reached!");
+					}
 				}
-			} else if (operation.equals("unregister")) {
+			}
+			// ---------------------------------------------------------------------------
+			// ---------------------------------------------------------------------------
+			else if (operation.equals("unregister")) {
 				String regName = tok.nextToken();
 				if (!reg.contains(regName)) {
 					out.println("no such name exists");
 					out.println("unregister failed");
 				} else {
-					int from = reg.indexOf(regName);
-					if (otherPlayer[from] > -1) {
+					int id = idmap.remove(regName);
+					if (otherPlayer[id] > -1) {
 						for (int i = 0; i < games.size(); i++)
-							if (games.get(i).pl1 == from
-									|| games.get(i).pl2 == from) {
+							if (games.get(i).pl1.equals(regName)
+									|| games.get(i).pl2.equals(regName)) {
 								games.remove(i);
 								break;
 							}
-						int to = otherPlayer[from];
-						messages[to].add(reg.get(from) + " DISCONNECTED");
+						int to = otherPlayer[id];
+						messages[to].add(regName + " DISCONNECTED");
 						synchronized (locks[to]) {
 							locks[to].notifyAll();
 						}
 					}
-					running[reg.indexOf(regName)] = false;
-					messages[reg.indexOf(regName)].clear();
-					synchronized (locks[reg.indexOf(regName)]) {
-						locks[reg.indexOf(regName)].notifyAll();
+					running[id] = false;
+					messages[id].clear();
+					synchronized (locks[id]) {
+						locks[id].notifyAll();
 					}
 					if (hosts.contains(regName))
 						hosts.remove(regName);
 					reg.remove(regName);
 					out.println("unregistered succsessfully");
 				}
-			} else if (operation.equals("host")) {
-
+			}
+			// ---------------------------------------------------------------------------
+			// ---------------------------------------------------------------------------
+			else if (operation.equals("host")) {
 				String regName = tok.nextToken();
+				int id = idmap.get(regName);
 				if (!reg.contains(regName)) {
 					out.println("no such name exists");
 					out.println("unregister failed");
 				} else if (hosts.contains(regName)) {
 					out.println("you are already in the host list");
+				} else if (otherPlayer[id] > -1) {
+					out.println("can't host");
+					out.println("you are already in a connection!");
 				} else {
 					synchronized (hosts) {
 						hosts.add(regName);
 					}
 					out.println("host starts successfully");
 					out.flush();
-					final int id = reg.indexOf(regName);
-					otherPlayer[id] = -1;
 					running[id] = true;
 					run(out, id);
 
 				}
-			} else if (operation.equals("connect")) {
+			}
+			// ---------------------------------------------------------------------------
+			// ---------------------------------------------------------------------------
+			else if (operation.equals("connect")) {
 				String me = tok.nextToken(), host = tok.nextToken();
-				if (!reg.contains(me) || !reg.contains(host)) {
+				int guest = idmap.get(me), hostId = idmap.get(host);
+				if (!reg.contains(me) || !reg.contains(host)
+						|| !hosts.contains(host)) {
 					out.println("no such name exists");
 					out.println("connect failed");
 				} else if (hosts.contains(me)) {
 					out.println("you are already in the host list");
 				} else {
-					final Game g;
-					games.add(g = new Game(reg.indexOf(host), reg.indexOf(me)));
+					games.add(new Game(me, host));
 					hosts.remove(host);
 					messages[reg.indexOf(host)].add(me + " " + "connected");
 					synchronized (locks[reg.indexOf(host)]) {
@@ -202,45 +229,56 @@ class TCPServer extends HttpServlet {
 					}
 					out.println("connected to " + host + " successfully");
 					out.flush();
-					otherPlayer[g.pl1] = g.pl2;
-					otherPlayer[g.pl2] = g.pl1;
-					running[g.pl2] = true;
-					run(out, g.pl2);
+					otherPlayer[guest] = hostId;
+					otherPlayer[hostId] = guest;
+					running[guest] = true;
+					run(out, guest);
 				}
-			} else if (operation.equals("disconnect")) {
+			}
+			// ---------------------------------------------------------------------------
+			// ---------------------------------------------------------------------------
+			else if (operation.equals("disconnect")) {
 				String name = tok.nextToken();
 				if (reg.contains(name)) {
 					if (hosts.contains(name))
 						hosts.remove(name);
 
-					int from = reg.indexOf(name);
-					if (otherPlayer[from] > -1) {
+					int id = idmap.get(name);
+					if (otherPlayer[id] > -1) {
+						String otherPlayerName = null;
 						for (int i = 0; i < games.size(); i++)
-							if (games.get(i).pl1 == from
-									|| games.get(i).pl2 == from) {
+							if (games.get(i).pl1.equals(name)
+									|| games.get(i).pl2.equals(name)) {
+								if (games.get(i).pl1.equals(name))
+									otherPlayerName = games.get(i).pl2;
+								else
+									otherPlayerName = games.get(i).pl1;
 								games.remove(i);
 								break;
 							}
-						int to = otherPlayer[from];
-						messages[to].add(reg.get(from) + " DISCONNECTED");
-						synchronized (locks[to]) {
-							locks[to].notifyAll();
+						int toId = otherPlayer[id];
+						messages[toId].add(otherPlayerName + " DISCONNECTED");
+						synchronized (locks[toId]) {
+							locks[toId].notifyAll();
 						}
 					}
 
-					out.println(running[reg.indexOf(name)]);
-					running[reg.indexOf(name)] = false;
-					synchronized (locks[reg.indexOf(name)]) {
-						locks[reg.indexOf(name)].notifyAll();
+					out.println(running[id]);
+					running[id] = false;
+					synchronized (locks[id]) {
+						locks[id].notifyAll();
 					}
-					out.println(running[reg.indexOf(name)]);
+					out.println(running[id]);
 					out.println("diconnected succsessfully");
 				} else
 					out.println("diconnect failed");
-			} else if (operation.equals("reconnect")) {
+			}
+			// ---------------------------------------------------------------------------
+			// ---------------------------------------------------------------------------
+			else if (operation.equals("reconnect")) {
 				String name = tok.nextToken();
 				if (reg.contains(name)) {
-					final int id = reg.indexOf(name);
+					int id = idmap.get(name);
 					running[id] = false;
 					synchronized (locks[id]) {
 						locks[id].notifyAll();
@@ -257,10 +295,13 @@ class TCPServer extends HttpServlet {
 					run(out, id);
 				} else
 					out.println("reconnect failed");
-			} else if (operation.equals("message")) {
+			}
+			// ---------------------------------------------------------------------------
+			// ---------------------------------------------------------------------------
+			else if (operation.equals("message")) {
 				String from = tok.nextToken();
 				if (reg.contains(from)) {
-					int myid = reg.indexOf(from);
+					int myid = idmap.get(from);
 					if (otherPlayer[myid] > -1) {
 						int to = otherPlayer[myid];
 						if (!tok.hasMoreTokens()) {
@@ -275,17 +316,20 @@ class TCPServer extends HttpServlet {
 							}
 							out.println("message sent successfully");
 						}
-					}
+					} else
+						out.println("you are not connected to other player");
 				}
-			} else if (operation == "endGame") {
+			}
+			// ---------------------------------------------------------------------------
+			else if (operation == "endGame") {
 				String me = tok.nextToken();
 				if (reg.contains(me)) {
-					int from = reg.indexOf(me), to;
+					int from = idmap.get(me), to;
 					if (otherPlayer[from] > -1) {
 
 						for (int i = 0; i < games.size(); i++)
-							if (games.get(i).pl1 == from
-									|| games.get(i).pl2 == from) {
+							if (games.get(i).pl1.equals(me)
+									|| games.get(i).pl2.equals(me)) {
 								games.remove(i);
 								break;
 							}
@@ -306,7 +350,10 @@ class TCPServer extends HttpServlet {
 					}
 				}
 			}
-		} else {
+		}
+		// ---------------------------------------------------------------------------
+		// ---------------------------------------------------------------------------
+		else {
 			out.println("incorrect password");
 		}
 		out.close();
