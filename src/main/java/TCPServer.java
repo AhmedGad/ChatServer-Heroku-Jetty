@@ -223,9 +223,9 @@ class TCPServer extends HttpServlet {
 				} else {
 					games.add(new Game(me, host));
 					hosts.remove(host);
-					messages[reg.indexOf(host)].add(me + " " + "connected");
-					synchronized (locks[reg.indexOf(host)]) {
-						locks[reg.indexOf(host)].notifyAll();
+					messages[hostId].add(me + " " + "connected");
+					synchronized (locks[hostId]) {
+						locks[hostId].notifyAll();
 					}
 					out.println("connected to " + host + " successfully");
 					out.flush();
